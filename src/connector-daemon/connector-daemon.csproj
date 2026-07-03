@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>connector_daemon</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Endpoints\Jobs\JobEvent.Model.cs">
+      <DependentUpon>JobEvent.POST.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Endpoints\Jobs\JobEvent.Validator.cs">
+      <DependentUpon>JobEvent.POST.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Endpoints\Jobs\JobEvent.Mapper.cs">
+      <DependentUpon>JobEvent.POST.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+  </ItemGroup>
+
+</Project>

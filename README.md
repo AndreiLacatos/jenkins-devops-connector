@@ -64,7 +64,22 @@ post {
 ...
 
 def notify(status) {
-  ...
+  def payload = """
+  {
+    "job": "${env.JOB_NAME}",
+    "build": ${env.BUILD_NUMBER},
+    "commit": "${env.GIT_COMMIT}",
+    "status": "${status}",
+    "url": "${env.BUILD_URL}"
+  }
+  """
+
+  httpRequest(
+    httpMode: 'POST',
+    url: 'https://your-service.example.com/api/v1/job-events',
+    contentType: 'APPLICATION_JSON',
+    requestBody: payload
+  )
 }
 ```
 
@@ -74,7 +89,7 @@ For Scripted Pipelines, invoke the same `notify(status)` helper at the appropria
 
 > **Note**
 >
-> * Replace `https://your-service.example.com/jenkins-event` with the URL where this application is deployed.
+> * Replace `https://your-service.example.com/` with the URL where this application is deployed.
 > * The Jenkins **HTTP Request Plugin** must be installed.
 
 ### Azure DevOps
