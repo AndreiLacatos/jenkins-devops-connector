@@ -27,6 +27,7 @@ internal static partial class JobEvent
                 .WithMessage("Status must not be empty.")
                 .Must(status => new[]
                 {
+                    "started",
                     "success",
                     "failure",
                     "aborted",

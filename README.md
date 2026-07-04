@@ -38,25 +38,35 @@ Pipelines whose build status should be reflected in Azure DevOps must notify the
 For Declarative Pipelines, add the following `post` block to your `Jenkinsfile`:
 
 ```groovy
-post {
-  started {
-    script {
-      notify('started')
+pipeline {
+  agent any
+
+  stages {
+    stage('First stage') {
+      steps {
+        script {
+          notify('started')
+        }
+
+        echo 'Building...'
+      }
     }
   }
-  success {
-    script {
-      notify('success')
+  post {
+    success {
+      script {
+        notify('success')
+      }
     }
-  }
-  failure {
-    script {
-      notify('failure')
+    unsuccessful {
+      script {
+        notify('failure')
+      }
     }
-  }
-  aborted {
-    script {
-      notify('aborted')
+    aborted {
+      script {
+        notify('aborted')
+      }
     }
   }
 }
@@ -82,6 +92,10 @@ def notify(status) {
   )
 }
 ```
+
+> **Note**
+>
+> * `notify('started')` needs to be invoked in the **first** stage
 
 #### Scripted Pipeline
 
@@ -126,3 +140,4 @@ To display Jenkins pipeline results in pull requests (and optionally require suc
    * **Policy applicability:** `Apply by default`.
 
 Optionally, mark the status policy as **Required** to prevent pull requests from being completed until the Jenkins pipeline reports a successful status.
+

@@ -1,0 +1,17 @@
+FROM alpine:3.22.2 AS base
+
+RUN apk add --no-cache git curl ca-certificates tar bash docker-cli
+
+RUN git config --global --add safe.directory '*'
+
+RUN CA_URL="http://dns.home.lab/certs/root" \
+    && echo "Attempting to download CA from $CA_URL" \
+    && if curl -fsSL "$CA_URL" -o /usr/local/share/ca-certificates/home_lab_root.crt; then \
+          echo "CA downloaded, updating trust store..." && update-ca-certificates; \
+       else \
+          echo "WARNING: Could not download internal CA. Proceeding without it."; \
+       fi
+
+RUN stat /usr/local/share/ca-certificates/home_lab_root.crt || echo "Internal CA not found, continuing without it."
+
+CMD ["/bin/bash"]

@@ -14,8 +14,11 @@ builder.Services.AddScoped<IJobEventRepository, JobEventRepository>();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-
 app.MapJobEventWebhook();
+
+var scope = app.Services.CreateAsyncScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+await dbContext.Database.MigrateAsync();
+await scope.DisposeAsync();
 
 app.Run();
