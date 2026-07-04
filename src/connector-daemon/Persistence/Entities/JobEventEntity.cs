@@ -12,6 +12,8 @@ internal sealed class JobEventEntity
     public string? Url { get; set; }
     public string RegisteredAt { get; set; }
     public string SyncStatus { get; set; }
+    public string? EnqueuedAt { get; set; }
+    public string? FinishedAt { get; set; }
 
     internal static JobEventEntity FromJobEvent(JobEvent jobEvent) => new JobEventEntity
     {
@@ -28,5 +30,7 @@ internal sealed class JobEventEntity
         Url = jobEvent.Url,
         RegisteredAt = jobEvent.RegisteredAt.ToString("O"),
         SyncStatus = SyncStatuses.Pending,
+        EnqueuedAt = null,
+        FinishedAt = null,
     };
 }

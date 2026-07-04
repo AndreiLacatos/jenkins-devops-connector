@@ -35,6 +35,15 @@ internal sealed class AppDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(40);
 
+            entity.HasIndex(e => new
+                {
+                    e.Name,
+                    e.Build,
+                    e.Commit,
+                    e.JobEvent
+                })
+                .IsUnique();
+
             entity.Property(e => e.Url)
                 .HasMaxLength(40);
 
@@ -44,6 +53,12 @@ internal sealed class AppDbContext : DbContext
 
             entity.Property(e => e.SyncStatus)
                 .IsRequired()
+                .HasMaxLength(40);
+
+            entity.Property(e => e.EnqueuedAt)
+                .HasMaxLength(40);
+
+            entity.Property(e => e.FinishedAt)
                 .HasMaxLength(40);
         });
 

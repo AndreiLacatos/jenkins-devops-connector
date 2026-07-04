@@ -1,0 +1,20 @@
+using connector_daemon.Services.EventRegistration.Models;
+
+namespace connector_daemon.Persistence;
+
+internal interface IJobEventProcessingStatusRepository
+{
+    Task<IEnumerable<JobEvent>> ListJobEventsAwaitingProcessingAsync(CancellationToken cancellationToken);
+
+    Task<IEnumerable<JobEvent>> ListJobEventsInProcessingAsync(CancellationToken cancellationToken);
+
+    Task MarkJobEventPendingAsync(JobEvent jobEvent, CancellationToken cancellationToken);
+
+    Task MarkJobEventEnqueuedAsync(JobEvent jobEvent, CancellationToken cancellationToken);
+
+    Task MarkJobEventProcessingAsync(JobEvent jobEvent, CancellationToken cancellationToken);
+
+    Task MarkJobEventCompletedAsync(JobEvent jobEvent, CancellationToken cancellationToken);
+
+    Task MarkJobEventFailedAsync(JobEvent jobEvent, CancellationToken cancellationToken);
+}
