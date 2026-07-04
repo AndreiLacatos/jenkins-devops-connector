@@ -63,6 +63,26 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
             .Select(MapJobEvent);
     }
 
+    public async Task<IEnumerable<JobEvent>> ListProcessedJobEvents(JobEventListFilter filter, CancellationToken cancellationToken)
+    {
+        var query = _dbContext.JobEvents
+            .Where(e => e.SyncStatus == SyncStatuses.Completed || e.SyncStatus == SyncStatuses.Failed);
+        if (filter.Build is not null)
+        {
+            query = query.Where(e => e.Build == filter.Build);
+        }
+        if (filter.JobName is not null)
+        {
+            query = query.Where(e => e.Name == filter.JobName);
+        }
+        if (filter.Commit is not null)
+        {
+            query = query.Where(e => e.Commit == filter.Commit);
+        }
+        return (await query.ToListAsync(cancellationToken))
+            .Select(MapJobEvent);
+    }
+
     public Task MarkJobEventPendingAsync(JobEvent jobEvent, CancellationToken cancellationToken)
         => UpdateJobEventAsync(
             jobEvent,
@@ -133,9 +153,10 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
         Name = e.Name,
         Build = e.Build,
         Commit = e.Commit,
+        GitUrl = e.GitUrl,
         Status = MapStatus(e.JobEvent),
         RegisteredAt = DateTimeOffset.Parse(e.RegisteredAt),
-        Url = e.Url,
+        BuildUrl = e.Url,
     };
 
     private static string MapStatus(JobStatus s) => s switch

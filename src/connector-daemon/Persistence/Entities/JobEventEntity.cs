@@ -7,6 +7,7 @@ internal sealed class JobEventEntity
     public int Id { get; set; }
     public string Name { get; set; }
     public int Build { get; set; }
+    public string GitUrl { get; set; }
     public string Commit { get; set; }
     public string JobEvent { get; set; }
     public string? Url { get; set; }
@@ -20,6 +21,7 @@ internal sealed class JobEventEntity
         Name = jobEvent.Name,
         Build = jobEvent.Build,
         Commit = jobEvent.Commit,
+        GitUrl = jobEvent.GitUrl,
         JobEvent = jobEvent.Status switch
         {
             JobStatus.Started => JobEvents.Started,
@@ -27,7 +29,7 @@ internal sealed class JobEventEntity
             JobStatus.Failed => JobEvents.Failed,
             _ => JobEvents.Aborted,
         },
-        Url = jobEvent.Url,
+        Url = jobEvent.BuildUrl,
         RegisteredAt = jobEvent.RegisteredAt.ToString("O"),
         SyncStatus = SyncStatuses.Pending,
         EnqueuedAt = null,

@@ -10,5 +10,6 @@ Accept: application/json
   "build": 7,
   "commit": "4d7c3a6c8e8a9d3b3f6b8d2b5e4a1c7d9e0f1234",
   "status": "success",
-  "url": "https://jenkins.example.com/job/connector-daemon/job/main/123/"
+  "gitUrl": "https://dev.azure.com/some-org/some-project/_git/some-repository",
+  "buildUrl": "https://jenkins.example.com/job/connector-daemon/job/main/123/"
 }

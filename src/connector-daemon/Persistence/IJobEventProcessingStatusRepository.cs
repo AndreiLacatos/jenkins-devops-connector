@@ -8,6 +8,8 @@ internal interface IJobEventProcessingStatusRepository
 
     Task<IEnumerable<JobEvent>> ListJobEventsInProcessingAsync(CancellationToken cancellationToken);
 
+    Task<IEnumerable<JobEvent>> ListProcessedJobEvents(JobEventListFilter filter, CancellationToken cancellationToken);
+
     Task MarkJobEventPendingAsync(JobEvent jobEvent, CancellationToken cancellationToken);
 
     Task MarkJobEventEnqueuedAsync(JobEvent jobEvent, CancellationToken cancellationToken);

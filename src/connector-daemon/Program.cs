@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using connector_daemon;
+using connector_daemon.AzureIntegration;
 using connector_daemon.Endpoints.Jobs;
 using connector_daemon.Persistence;
 using connector_daemon.Services.EventRegistration;
@@ -24,6 +25,9 @@ builder.Services.AddScoped<IJobEventProcessor, JobEventProcessor>();
 var channel = Channel.CreateUnbounded<JobEventModel>();
 builder.Services.AddSingleton(_ => channel.Reader);
 builder.Services.AddSingleton(_ => channel.Writer);
+builder.Services.AddScoped<IAzureClient, AzureClient>();
+builder.Services.Configure<AzureClientOptions>(
+    builder.Configuration.GetSection(nameof(AzureClientOptions)));
 
 var app = builder.Build();
 

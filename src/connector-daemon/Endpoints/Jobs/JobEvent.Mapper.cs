@@ -11,6 +11,7 @@ internal static partial class JobEvent
             {
                 Name = apiModel.Name!,
                 Build = apiModel.Build!.Value,
+                GitUrl = apiModel.GitUrl!,
                 Commit = apiModel.Commit!,
                 Status = apiModel.Status!.ToLowerInvariant() switch
                 {
@@ -19,7 +20,7 @@ internal static partial class JobEvent
                     "failure" => JobStatus.Failed,
                     _ => JobStatus.Aborted,
                 },
-                Url = apiModel.Url,
+                Url = apiModel.BuildUrl,
             };
         } 
     }

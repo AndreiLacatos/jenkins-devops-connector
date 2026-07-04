@@ -40,12 +40,15 @@ internal sealed class AppDbContext : DbContext
                     e.Name,
                     e.Build,
                     e.Commit,
-                    e.JobEvent
+                    e.JobEvent,
                 })
                 .IsUnique();
 
+            entity.Property(e => e.GitUrl)
+                .HasMaxLength(500);
+
             entity.Property(e => e.Url)
-                .HasMaxLength(40);
+                .HasMaxLength(500);
 
             entity.Property(e => e.RegisteredAt)
                 .IsRequired()
