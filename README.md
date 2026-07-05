@@ -86,18 +86,23 @@ def notify(status) {
   }
   """
 
-  httpRequest(
-    httpMode: 'POST',
-    url: 'https://your-service.example.com/api/v1/job-events',
-    contentType: 'APPLICATION_JSON',
-    requestBody: payload
-  )
+  try {
+    httpRequest(
+      httpMode: 'POST',
+      url: 'https://your-service.example.com/api/v1/job-events',
+      contentType: 'APPLICATION_JSON',
+      requestBody: payload
+    )
+  } catch (Exception e) {
+    echo "Failed to notify Jenkins-DevOps connector: ${e.message}"
+  }
 }
 ```
 
 > **Note**
 >
 > * `notify('started')` needs to be invoked in the **first** stage
+> * notifications are **best-effort only** to prevent declaring entire pipeline failure in case Jenkins _cannot_ notify the connector
 
 #### Scripted Pipeline
 
