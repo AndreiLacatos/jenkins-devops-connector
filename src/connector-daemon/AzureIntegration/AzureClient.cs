@@ -78,6 +78,120 @@ internal sealed class AzureClient : IAzureClient, IDisposable
         };
     }
 
+    public async Task<IEnumerable<AzurePullRequest>> ListActivePullRequestsAsync(AzureRepo repo, CancellationToken cancellationToken)
+    {
+        var pullRequests = await _gitClient.GetPullRequestsAsync(
+            repo.Project.Name,
+            repo.Id,
+            new GitPullRequestSearchCriteria
+            {
+                Status = PullRequestStatus.Active,
+            },
+            cancellationToken: cancellationToken);
+        foreach (var pr in pullRequests)
+        {
+            var commits = await _gitClient.GetPullRequestCommitsAsync(
+                repo.Project.Name,
+                pr.PullRequestId,
+                cancellationToken: cancellationToken);
+            pr.Commits = commits?.ToArray() ?? [];
+        }
+        var targetPrs = pullRequests.Where(pr => pr.Commits.Length != 0);
+        var mappedPrs = new List<AzurePullRequest>();
+        foreach (var pr in targetPrs)
+        {
+            var commit = pr.Commits.FirstOrDefault();
+            // try to figure out the latest Jenkins status
+            var iterations = await _gitClient.GetPullRequestIterationsAsync(
+                pr.Repository.Id,
+                pr.PullRequestId,
+                cancellationToken: cancellationToken);
+            var latestIteration = iterations.Max(i => i.Id);
+            if (latestIteration is null)
+            {
+                // no luck
+                mappedPrs.Add(new AzurePullRequest
+                {
+                    Id = pr.PullRequestId,
+                    Title = pr.Title,
+                    LatestJenkinsStatus = null,
+                    LatestCommit = commit is null ? null : new AzureCommit
+                    {
+                        Id = commit.CommitId,
+                        LatestJenkinsStatus = null,
+                    },
+                });
+                continue;
+            }
+
+            var iterationCommits = await _gitClient.GetPullRequestIterationCommitsAsync(
+                pr.Repository.Id,
+                pr.PullRequestId,
+                latestIteration.Value,
+                cancellationToken: cancellationToken);
+            var iterationCommit = iterationCommits.FirstOrDefault(c => c.CommitId == commit?.CommitId);
+            if (iterationCommit is not null)
+            {
+                var commitStatuses = await _gitClient.GetStatusesAsync(
+                    iterationCommit.CommitId,
+                    pr.Repository.Id,
+                    cancellationToken: cancellationToken);
+                var latestCommitStatus = commitStatuses?.MaxBy(s => s.CreationDate);
+                iterationCommit.Statuses = [latestCommitStatus];
+            }
+            var statuses = await _gitClient.GetPullRequestIterationStatusesAsync(
+                    pr.Repository.Id,
+                    pr.PullRequestId,
+                    latestIteration.Value,
+                    cancellationToken: cancellationToken);
+            var latest = statuses?.MaxBy(s => s.CreationDate);
+            if (latest is not null)
+            {
+                mappedPrs.Add(new AzurePullRequest
+                {
+                    Id = pr.PullRequestId,
+                    Title = pr.Title,
+                    LatestJenkinsStatus = new SynchronizedJenkinsStatus
+                    {
+                        State = MapAzureState(latest.State),
+                        CreationTime = latest.CreationDate,
+                    },
+                    LatestCommit = iterationCommit is null ? null : new AzureCommit
+                    {
+                        Id = iterationCommit.CommitId,
+                        LatestJenkinsStatus = (iterationCommit.Statuses?.Count ?? 0) == 0 ? null : new SynchronizedJenkinsStatus
+                        {
+                            State = MapAzureState(iterationCommit.Statuses![0].State),
+                            CreationTime = iterationCommit.Statuses![0].CreationDate,
+                        },
+                    },
+                });
+
+            }
+            else
+            {
+                // no luck
+                mappedPrs.Add(new AzurePullRequest
+                {
+                    Id = pr.PullRequestId,
+                    Title = pr.Title,
+                    LatestJenkinsStatus = null,
+                    LatestCommit = iterationCommit is null ? null : new AzureCommit
+                    {
+                        Id = iterationCommit.CommitId,
+                        LatestJenkinsStatus = (iterationCommit.Statuses?.Count ?? 0) == 0 ? null : new SynchronizedJenkinsStatus
+                        {
+                            State = MapAzureState(iterationCommit.Statuses![0].State),
+                            CreationTime = iterationCommit.Statuses![0].CreationDate,
+                        },
+                    },
+                });
+            }
+        }
+
+        return mappedPrs;
+    }
+
     public async Task<IEnumerable<AzurePullRequest>> ListAssociatedActivePullRequestsAsync(
         AzureRepo repo, AzureCommit commit, CancellationToken cancellationToken)
     {
@@ -116,6 +230,7 @@ internal sealed class AzureClient : IAzureClient, IDisposable
                     Id = pr.PullRequestId,
                     Title = pr.Title,
                     LatestJenkinsStatus = null,
+                    LatestCommit = null,
                 });
                 continue;
             }
@@ -136,6 +251,7 @@ internal sealed class AzureClient : IAzureClient, IDisposable
                         State = MapAzureState(latest.State),
                         CreationTime = latest.CreationDate,
                     },
+                    LatestCommit = null,
                 });
 
             }
@@ -147,6 +263,7 @@ internal sealed class AzureClient : IAzureClient, IDisposable
                     Id = pr.PullRequestId,
                     Title = pr.Title,
                     LatestJenkinsStatus = null,
+                    LatestCommit = null,
                 });
             }
         }
@@ -209,7 +326,7 @@ internal sealed class AzureClient : IAzureClient, IDisposable
         _gitClient.Dispose();
     }
 
-    static string NormalizeRepoUrl(string url)
+    private static string NormalizeRepoUrl(string url)
     {
         if (string.IsNullOrWhiteSpace(url))
             return string.Empty;

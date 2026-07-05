@@ -10,15 +10,18 @@ internal sealed class JobEventProcessor : IJobEventProcessor
     private readonly ILogger<JobEventProcessor> _logger;
     private readonly IJobEventProcessingStatusRepository _repository;
     private readonly IAzureClient _azureClient;
+    private readonly MonitoredRepositories _monitoredRepositories;
 
     public JobEventProcessor(
         ILogger<JobEventProcessor> logger,
         IJobEventProcessingStatusRepository repository,
-        IAzureClient azureClient)
+        IAzureClient azureClient,
+        MonitoredRepositories monitoredRepositories)
     {
         _logger = logger;
         _repository = repository;
         _azureClient = azureClient;
+        _monitoredRepositories = monitoredRepositories;
     }
 
     public async Task ProcessJobEventAsync(JobEvent job, CancellationToken cancellationToken)
@@ -54,6 +57,7 @@ internal sealed class JobEventProcessor : IJobEventProcessor
             var azureRepo = await _azureClient.GetRepositoryAsync(job.GitUrl, cancellationToken);
             var azureCommit = await _azureClient.GetCommitAsync(azureRepo, job.Commit, cancellationToken);
             var azurePrs = await _azureClient.ListAssociatedActivePullRequestsAsync(azureRepo, azureCommit, cancellationToken);
+            _monitoredRepositories.Add(azureRepo);
 
             var commitHasTerminalState = azureCommit.LatestJenkinsStatus?.State
                 is AzureStateEnum.Succeeded or AzureStateEnum.Failed;
