@@ -10,7 +10,7 @@ export default function JobsDashboard() {
 
   const activeRepo = useMemo(() => {
     if (!selectedRepo) return repos[0];
-    return repos.find((r) => r.repositoryName === selectedRepo);
+    return repos.find((r) => r.repository === selectedRepo);
   }, [selectedRepo, repos]);
 
   if (loading) {
@@ -40,15 +40,15 @@ export default function JobsDashboard() {
             <div className="flex gap-1 py-2 overflow-x-auto">
               {repos.map((repo) => (
                 <button
-                  key={repo.repositoryName}
-                  onClick={() => setSelectedRepo(repo.repositoryName)}
+                  key={repo.repository}
+                  onClick={() => setSelectedRepo(repo.repository)}
                   className={`px-3 py-1 text-sm rounded cursor-pointer transition border ${
-                    activeRepo?.repositoryName === repo.repositoryName
+                    activeRepo?.repository === repo.repository
                       ? "bg-cyan-600 text-white border-cyan-600"
                       : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
                   }`}
                 >
-                  {repo.repositoryName}
+                  {repo.repository}
                 </button>
               ))}
             </div>

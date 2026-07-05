@@ -30,9 +30,11 @@ export function useRecentJobs() {
         let cancelled = false;
         let intervalId: ReturnType<typeof setInterval>;
 
-        async function fetchJobs() {
+        async function fetchJobs(refresh: boolean) {
             try {
-                setLoading(true);
+                if (!refresh) {
+                    setLoading(true);
+                }
 
                 const res = await fetch("api/recent-jobs");
 
@@ -56,11 +58,11 @@ export function useRecentJobs() {
         }
 
         // initial load
-        fetchJobs();
+        fetchJobs(false);
 
         // polling every 10s after success
         intervalId = setInterval(() => {
-            fetchJobs();
+            fetchJobs(true);
         }, 10000);
 
         return () => {
