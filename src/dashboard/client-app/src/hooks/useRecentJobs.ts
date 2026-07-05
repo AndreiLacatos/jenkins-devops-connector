@@ -13,7 +13,7 @@ export type JobApiModel = {
 };
 
 export type RepositoryJobsApiModel = {
-    repositoryName: string;
+    repository: string;
     branchJobs: Record<string, JobApiModel>;
 };
 

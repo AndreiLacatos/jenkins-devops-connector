@@ -6,8 +6,8 @@ services:
     container_name: connector-daemon
     restart: unless-stopped
 
-    ports:
-      - "80:5739"
+    expose:
+      - "5739"
 
     environment:
       AzureClientOptions__OrganizationUrl: ${AZURE_ORGANIZATION_URL}
@@ -16,3 +16,28 @@ services:
 
     volumes:
       - ${DATA_DIR}:/data
+
+    networks:
+      - jenkins-azure-connector
+
+  dashboard:
+    image: ${CONNECTOR_DASHBOARD_IMAGE}
+    container_name: connector-dashboard
+    restart: unless-stopped
+
+    ports:
+      - "80:5741"
+
+    environment:
+      DaemonClientOptions__UrlBase: "http://connector-daemon:5739"
+
+    depends_on:
+      - connector-daemon
+
+    networks:
+      - jenkins-azure-connector
+
+networks:
+  jenkins-azure-connector:
+    name: jenkins-azure-connector
+    driver: bridge

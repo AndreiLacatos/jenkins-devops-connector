@@ -17,9 +17,6 @@
     <Compile Update="Endpoints\Jobs\Job.Mapper.cs">
       <DependentUpon>Job.GET.cs</DependentUpon>
     </Compile>
-    <Compile Update="Endpoints\Health\Health.Model.cs">
-      <DependentUpon>Health.GET.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>

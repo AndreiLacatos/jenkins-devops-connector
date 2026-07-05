@@ -30,7 +30,7 @@ internal static class JobEventGET
         [FromServices] IJobEventProcessingQueryService queryService,
         CancellationToken cancellationToken)
     {
-        var jobs = await queryService.ListRepositoryJobsByBracnAsync(repository, cancellationToken);
+        var jobs = await queryService.ListRepositoryJobsByBranchAsync(repository, cancellationToken);
         return Results.Ok(new RepositoryJobs
         {
             RepositoryName = repository,

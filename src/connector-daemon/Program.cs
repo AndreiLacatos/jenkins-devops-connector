@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using connector_daemon;
 using connector_daemon.AzureIntegration;
+using connector_daemon.Endpoints.Health;
 using connector_daemon.Endpoints.Jobs;
 using connector_daemon.HealthChecks;
 using connector_daemon.Persistence;
@@ -45,7 +46,7 @@ builder.Services
 
 var app = builder.Build();
 
-app.MapHealthChecks("/health");
+app.MapHealthCheck();
 app.MapJobEventWebhook();
 app.MapJobEventQueries();
 

@@ -49,7 +49,7 @@ pipeline {
 
                 sh '''
                     IMAGE_NAME=$NEXUS_URL/$NEXUS_REPO/jenkins-connector-daemon
-                    docker build --no-cache -t $IMAGE_NAME:$VERSION -f src/connector-daemon/Dockerfile src/connector-daemon
+                    docker build --no-cache -t $IMAGE_NAME:$VERSION -f src/connector-daemon/Dockerfile ./src
                 '''
             }
         }
@@ -116,7 +116,7 @@ pipeline {
 
                 sh '''
                     IMAGE_NAME=$NEXUS_URL/$NEXUS_REPO/jenkins-connector-dashboard
-                    docker build --no-cache -t $IMAGE_NAME:$VERSION -f src/dashboard/Dockerfile src/dashboard
+                    docker build --no-cache -t $IMAGE_NAME:$VERSION -f src/dashboard/Dockerfile ./src
                 '''
             }
         }

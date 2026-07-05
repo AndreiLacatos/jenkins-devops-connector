@@ -2,23 +2,26 @@ FROM node:20-alpine AS frontend-build
 
 WORKDIR /client
 
-COPY client-app/package*.json ./
+COPY dashboard/client-app/package*.json ./
 RUN npm ci
 
-COPY client-app/ ./
+COPY dashboard/client-app/ ./
 RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY *.csproj ./
-RUN dotnet restore
+COPY dashboard/dashboard.csproj dashboard/
+COPY common/connector-sytem.Common/connector-sytem.Common.csproj common/connector-sytem.Common/
+
+RUN dotnet restore dashboard/dashboard.csproj
 
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
 
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 as final
+RUN dotnet publish dashboard/dashboard.csproj -c Release -o /app/publish
+
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 COPY --from=build /app/publish .
