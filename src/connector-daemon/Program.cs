@@ -39,8 +39,29 @@ app.MapJobEventWebhook();
 
 var scope = app.Services.CreateAsyncScope();
 var lifetime = scope.ServiceProvider.GetRequiredService<IHostApplicationLifetime>();
+// migrate database
 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 await dbContext.Database.MigrateAsync(lifetime.ApplicationStopping);
+
+// hydrate monitored repositories
+var repository = scope.ServiceProvider.GetRequiredService<IJobEventRepository>();
+var azureClient = scope.ServiceProvider.GetRequiredService<IAzureClient>();
+var monitoredAzureRepos = scope.ServiceProvider.GetRequiredService<MonitoredRepositories>();
+var monitoredGitRepos = await repository.ListMonitoredRepositoriesAsync(lifetime.ApplicationStopping);
+foreach (var gitRepo in monitoredGitRepos)
+{
+    try
+    {
+        var azureRepo = await azureClient.GetRepositoryAsync(gitRepo, lifetime.ApplicationStopping);
+        monitoredAzureRepos.Add(azureRepo);
+    }
+    catch
+    {
+        app.Logger.LogWarning("Failed to resolve Azure repository by git URL '{GitUrl}'", gitRepo);
+    }
+}
+
+// requeue stale jobs
 var normalizer = scope.ServiceProvider.GetRequiredService<IJobEventStatusNormalizer>();
 await normalizer.ResetStaleJobEventsAsync(lifetime.ApplicationStopping);
 await scope.DisposeAsync();

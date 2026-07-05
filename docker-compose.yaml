@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  connector-daemon:
+    image: ${CONNECTOR_DAEMON_IMAGE}
+    container_name: connector-daemon
+    restart: unless-stopped
+
+    ports:
+      - "80:5739"
+
+    environment:
+      AzureClientOptions__OrganizationUrl: ${AZURE_ORGANIZATION_URL}
+      AzureClientOptions__Pat: ${AZURE_PAT}
+      ConnectionStrings__DefaultConnection: "Data Source=/data/jobs.db"
+
+    volumes:
+      - ${DATA_DIR}:/data

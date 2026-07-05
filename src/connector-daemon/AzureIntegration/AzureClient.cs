@@ -91,7 +91,7 @@ internal sealed class AzureClient : IAzureClient, IDisposable
         foreach (var pr in pullRequests)
         {
             var commits = await _gitClient.GetPullRequestCommitsAsync(
-                repo.Project.Name,
+                repo.Id,
                 pr.PullRequestId,
                 cancellationToken: cancellationToken);
             pr.Commits = commits?.ToArray() ?? [];
@@ -179,10 +179,10 @@ internal sealed class AzureClient : IAzureClient, IDisposable
                     LatestCommit = iterationCommit is null ? null : new AzureCommit
                     {
                         Id = iterationCommit.CommitId,
-                        LatestJenkinsStatus = (iterationCommit.Statuses?.Count ?? 0) == 0 ? null : new SynchronizedJenkinsStatus
+                        LatestJenkinsStatus = iterationCommit.Statuses?.FirstOrDefault() is null ? null : new SynchronizedJenkinsStatus
                         {
-                            State = MapAzureState(iterationCommit.Statuses![0].State),
-                            CreationTime = iterationCommit.Statuses![0].CreationDate,
+                            State = MapAzureState(iterationCommit.Statuses.First().State),
+                            CreationTime = iterationCommit.Statuses.First().CreationDate,
                         },
                     },
                 });

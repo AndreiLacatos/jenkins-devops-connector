@@ -27,7 +27,10 @@ internal sealed class PullRequestStatusReconciler : IPullRequestStatusReconciler
     {
         foreach (var azureRepo in _monitoredRepositories)
         {
-            _logger.LogInformation("Reconciling repository '{RepoName}' pull requests", azureRepo.Name);
+            _logger.LogInformation(
+                "Reconciling repository '{RepoName}' (project '{ProjectName}') pull requests",
+                azureRepo.Name,
+                azureRepo.Project.Name);
             var pullRequests = await _azureClient.ListActivePullRequestsAsync(azureRepo, cancellationToken);
             foreach (var pullRequest in pullRequests)
             {

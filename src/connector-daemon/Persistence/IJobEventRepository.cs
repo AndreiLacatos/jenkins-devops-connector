@@ -7,4 +7,6 @@ internal interface IJobEventRepository
     Task<IEnumerable<JobEvent>> ListJobEventsAsync(JobEventListFilter filter, CancellationToken cancellationToken);
 
     Task SaveJobEventAsync(JobEvent jobEvent, CancellationToken cancellationToken);
+
+    Task<IEnumerable<string>> ListMonitoredRepositoriesAsync(CancellationToken cancellationToken);
 }

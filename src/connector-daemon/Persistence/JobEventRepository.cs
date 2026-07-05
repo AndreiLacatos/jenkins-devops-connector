@@ -47,6 +47,11 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<string>> ListMonitoredRepositoriesAsync(CancellationToken cancellationToken)
+    {
+        return await _dbContext.JobEvents.Select(e => e.GitUrl).Distinct().ToListAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<JobEvent>> ListJobEventsAwaitingProcessingAsync(CancellationToken cancellationToken)
     {
         return (await _dbContext.JobEvents

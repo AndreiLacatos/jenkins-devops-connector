@@ -8,12 +8,12 @@ internal sealed class MonitoredRepositories : IEnumerable<AzureRepo>
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private readonly HashSet<AzureRepo> _projects = new HashSet<AzureRepo>(new AzureRepoComparer());
 
-    internal void Add(AzureRepo project)
+    internal void Add(AzureRepo repo)
     {
         _semaphore.Wait();
         try
         {
-            _projects.Add(project);
+            _projects.Add(repo);
         }
         finally
         {
