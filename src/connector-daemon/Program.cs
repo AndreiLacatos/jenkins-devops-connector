@@ -2,6 +2,7 @@ using System.Threading.Channels;
 using connector_daemon;
 using connector_daemon.AzureIntegration;
 using connector_daemon.Endpoints.Jobs;
+using connector_daemon.HealthChecks;
 using connector_daemon.Persistence;
 using connector_daemon.Services.EventRegistration;
 using connector_daemon.Services.JobEventProcessing;
@@ -32,9 +33,18 @@ builder.Services.AddSingleton(_ => channel.Writer);
 builder.Services.AddScoped<IAzureClient, AzureClient>();
 builder.Services.Configure<AzureClientOptions>(
     builder.Configuration.GetSection(nameof(AzureClientOptions)));
+builder.Services
+    .AddHealthChecks()
+    .AddCheck<AzureHealthCheck>(
+        name: "AZURE",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy)
+    .AddCheck<PersistenceHealthCheck>(
+        name: "PERSISTENCE",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
 
 var app = builder.Build();
 
+app.MapHealthChecks("/health");
 app.MapJobEventWebhook();
 
 var scope = app.Services.CreateAsyncScope();

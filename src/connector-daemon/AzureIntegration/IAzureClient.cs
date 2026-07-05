@@ -5,6 +5,7 @@ namespace connector_daemon.AzureIntegration;
 
 internal interface IAzureClient
 {
+    Task<IEnumerable<AzureRepo>> ListVisibleRepositories(CancellationToken cancellationToken);
     Task<AzureRepo> GetRepositoryAsync(string repoUrl, CancellationToken cancellationToken);
     Task<AzureCommit> GetCommitAsync(AzureRepo repo, string commit, CancellationToken cancellationToken);
     Task<IEnumerable<AzurePullRequest>> ListActivePullRequestsAsync(

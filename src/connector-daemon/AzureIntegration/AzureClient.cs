@@ -25,6 +25,21 @@ internal sealed class AzureClient : IAzureClient, IDisposable
     private readonly VssConnection _connection;
     private readonly GitHttpClient _gitClient;
 
+    public async Task<IEnumerable<AzureRepo>> ListVisibleRepositories(CancellationToken cancellationToken)
+    {
+        var repos = await _gitClient.GetRepositoriesAsync(cancellationToken: cancellationToken);
+        return repos.Select(repo => new AzureRepo
+        {
+            Id = repo.Id.ToString(),
+            Name = repo.Name,
+            Project = new AzureProject
+            {
+                Id = repo.ProjectReference.Id.ToString(),
+                Name = repo.ProjectReference.Name,
+            },
+        });
+    }
+
     public async Task<AzureRepo> GetRepositoryAsync(string repoUrl, CancellationToken cancellationToken)
     {
         var repos = await _gitClient.GetRepositoriesAsync(cancellationToken: cancellationToken);
