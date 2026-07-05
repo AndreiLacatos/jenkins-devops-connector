@@ -12,6 +12,9 @@ internal static partial class JobEvent
         [JsonPropertyName("build")]
         public int? Build { get; init; }
 
+        [JsonPropertyName("branch")]
+        public string? Branch { get; init; }
+
         [JsonPropertyName("gitUrl")]
         public string? GitUrl { get; init; }
 

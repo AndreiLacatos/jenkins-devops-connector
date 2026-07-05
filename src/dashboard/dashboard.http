@@ -1,2 +1,6 @@
 @dashboard_HostAddress = http://localhost:5035
 
+### List jobs
+GET {{dashboard_HostAddress}}/api/recent-jobs
+Content-Type: application/json
+Accept: application/json

@@ -1,5 +1,6 @@
 using connector_daemon.Persistence.Entities;
 using connector_daemon.Services.EventRegistration.Models;
+using connector_daemon.Services.JobEventProcessing.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 
@@ -88,6 +89,18 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
             .Select(MapJobEvent);
     }
 
+    public async Task<IEnumerable<Job>> ListJobsAsync(JobListFilter filter, CancellationToken cancellationToken)
+    {
+        var query = _dbContext.JobEvents
+            .Where(e => e.SyncStatus == SyncStatuses.Completed || e.SyncStatus == SyncStatuses.Failed);
+        if (filter.Repository is not null)
+        {
+            query = query.Where(e => e.GitUrl.Contains(filter.Repository));
+        }
+        return (await query.ToListAsync(cancellationToken))
+            .Select(MapJob);
+    }
+
     public Task MarkJobEventPendingAsync(JobEvent jobEvent, CancellationToken cancellationToken)
         => UpdateJobEventAsync(
             jobEvent,
@@ -158,10 +171,26 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
         Name = e.Name,
         Build = e.Build,
         Commit = e.Commit,
+        Branch = e.Branch,
         GitUrl = e.GitUrl,
         Status = MapStatus(e.JobEvent),
         RegisteredAt = DateTimeOffset.Parse(e.RegisteredAt),
         BuildUrl = e.Url,
+    };
+
+    private static Job MapJob(JobEventEntity e) => new Job
+    {
+        Name = e.Name,
+        Build = e.Build,
+        Commit = e.Commit,
+        Branch = e.Branch,
+        GitUrl = e.GitUrl,
+        Status = MapStatus(e.JobEvent),
+        RegisteredAt = DateTimeOffset.Parse(e.RegisteredAt),
+        BuildUrl = e.Url,
+        SyncStatus = MapSyncStatus(e.SyncStatus),
+        EnqueuedAt = e.EnqueuedAt is null ? null : DateTimeOffset.Parse(e.EnqueuedAt),
+        FinishedAt = e.FinishedAt is null ? null : DateTimeOffset.Parse(e.FinishedAt),
     };
 
     private static string MapStatus(JobStatus s) => s switch
@@ -178,5 +207,14 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
         JobEvents.Succeeded => JobStatus.Succeeded,
         JobEvents.Failed => JobStatus.Failed,
         _ => JobStatus.Aborted,
+    };
+
+    private static SyncStatus MapSyncStatus(string s) => s switch
+    {
+        SyncStatuses.Pending => SyncStatus.Pending,
+        SyncStatuses.Enqueued => SyncStatus.Enqueued,
+        SyncStatuses.Processing => SyncStatus.Processing,
+        SyncStatuses.Completed => SyncStatus.Completed,
+        _ => SyncStatus.Failed,
     };
 }

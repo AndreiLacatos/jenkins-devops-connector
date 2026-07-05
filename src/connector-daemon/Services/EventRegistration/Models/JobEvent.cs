@@ -6,6 +6,7 @@ internal sealed class JobEvent
     public required int Build { get; init; }
     public required string GitUrl { get; init; }
     public required string Commit { get; init; }
+    public required string Branch { get; init; }
     public required JobStatus Status { get; init; }
     public required string? BuildUrl { get; init; }
     public required DateTimeOffset RegisteredAt { get; set; }
@@ -14,6 +15,7 @@ internal sealed class JobEvent
     {
         Build = request.Build,
         Commit = request.Commit,
+        Branch = request.Branch,
         Name = request.Name,
         GitUrl = request.GitUrl,
         Status = request.Status,

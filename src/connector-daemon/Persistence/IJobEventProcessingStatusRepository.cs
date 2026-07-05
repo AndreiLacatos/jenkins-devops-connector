@@ -1,4 +1,5 @@
 using connector_daemon.Services.EventRegistration.Models;
+using connector_daemon.Services.JobEventProcessing.Models;
 
 namespace connector_daemon.Persistence;
 
@@ -9,6 +10,8 @@ internal interface IJobEventProcessingStatusRepository
     Task<IEnumerable<JobEvent>> ListJobEventsInProcessingAsync(CancellationToken cancellationToken);
 
     Task<IEnumerable<JobEvent>> ListProcessedJobEvents(JobEventListFilter filter, CancellationToken cancellationToken);
+
+    Task<IEnumerable<Job>> ListJobsAsync(JobListFilter filter, CancellationToken cancellationToken);
 
     Task MarkJobEventPendingAsync(JobEvent jobEvent, CancellationToken cancellationToken);
 

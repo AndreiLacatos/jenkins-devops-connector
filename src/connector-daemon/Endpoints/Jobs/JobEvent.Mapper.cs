@@ -13,6 +13,7 @@ internal static partial class JobEvent
                 Build = apiModel.Build!.Value,
                 GitUrl = apiModel.GitUrl!,
                 Commit = apiModel.Commit!,
+                Branch = apiModel.Branch!,
                 Status = apiModel.Status!.ToLowerInvariant() switch
                 {
                     "started" => JobStatus.Started,

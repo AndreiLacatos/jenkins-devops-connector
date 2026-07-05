@@ -21,6 +21,10 @@ internal static partial class JobEvent
                 .NotEmpty()
                 .WithMessage("Git URL must not be empty.");
 
+            RuleFor(x => x.Branch)
+                .NotEmpty()
+                .WithMessage("Branch must not be empty.");
+
             RuleFor(x => x.Commit)
                 .NotEmpty()
                 .Matches("^[a-fA-F0-9]{40}$")

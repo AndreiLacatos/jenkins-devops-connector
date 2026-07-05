@@ -31,6 +31,10 @@ internal sealed class AppDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(40);
 
+            entity.Property(e => e.Branch)
+                .IsRequired()
+                .HasMaxLength(400);
+
             entity.Property(e => e.JobEvent)
                 .IsRequired()
                 .HasMaxLength(40);

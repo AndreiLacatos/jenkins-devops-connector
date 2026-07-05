@@ -30,4 +30,8 @@
     <PackageReference Include="Microsoft.TeamFoundationServer.ExtendedClient" Version="20.256.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../common/connector-sytem.Common/connector-sytem.Common.csproj" />
+  </ItemGroup>
+
 </Project>

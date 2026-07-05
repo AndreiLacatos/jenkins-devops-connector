@@ -1,5 +1,9 @@
 @connector_daemon_HostAddress = http://localhost:5739
 
+### Health
+GET {{connector_daemon_HostAddress}}/health
+Accept: application/json
+
 ### Job event webhook
 POST {{connector_daemon_HostAddress}}/api/v1/job-events
 Content-Type: application/json
@@ -13,3 +17,11 @@ Accept: application/json
   "gitUrl": "https://dev.azure.com/some-org/some-project/_git/some-repository",
   "buildUrl": "https://jenkins.example.com/job/connector-daemon/job/main/123/"
 }
+
+### List monitored repositories
+GET {{connector_daemon_HostAddress}}/api/system/jobs/repositories
+Accept: application/json
+
+### List repository jobs
+GET {{connector_daemon_HostAddress}}/api/system/jobs/some-repo
+Accept: application/json

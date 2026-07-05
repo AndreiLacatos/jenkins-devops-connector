@@ -26,6 +26,7 @@ builder.Services.AddHostedService<PullRequestWatcher>();
 builder.Services.AddScoped<IJobEventEnqueuer, JobEventEnqueuer>();
 builder.Services.AddScoped<IJobEventProcessor, JobEventProcessor>();
 builder.Services.AddScoped<IPullRequestStatusReconciler, PullRequestStatusReconciler>();
+builder.Services.AddScoped<IJobEventProcessingQueryService, JobEventProcessingQueryService>();
 builder.Services.AddSingleton(new MonitoredRepositories());
 var channel = Channel.CreateUnbounded<JobEventModel>();
 builder.Services.AddSingleton(_ => channel.Reader);
@@ -46,6 +47,7 @@ var app = builder.Build();
 
 app.MapHealthChecks("/health");
 app.MapJobEventWebhook();
+app.MapJobEventQueries();
 
 var scope = app.Services.CreateAsyncScope();
 var lifetime = scope.ServiceProvider.GetRequiredService<IHostApplicationLifetime>();

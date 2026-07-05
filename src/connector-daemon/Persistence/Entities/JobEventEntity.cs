@@ -8,6 +8,7 @@ internal sealed class JobEventEntity
     public string Name { get; set; }
     public int Build { get; set; }
     public string GitUrl { get; set; }
+    public string Branch { get; set; }
     public string Commit { get; set; }
     public string JobEvent { get; set; }
     public string? Url { get; set; }

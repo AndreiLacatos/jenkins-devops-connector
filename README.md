@@ -79,7 +79,8 @@ def notify(status) {
     "job": "${env.JOB_NAME}",
     "build": ${env.BUILD_NUMBER},
     "commit": "${env.GIT_COMMIT}",
-    "gitUrl: "${env.GIT_URL}",
+    "branch": "${env.BRANCH_NAME}",
+    "gitUrl": "${env.GIT_URL}",
     "status": "${status}",
     "buildUrl": "${env.BUILD_URL}"
   }

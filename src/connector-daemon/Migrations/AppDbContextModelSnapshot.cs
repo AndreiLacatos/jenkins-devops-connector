@@ -22,6 +22,11 @@ namespace connector_daemon.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Branch")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Build")
                         .HasColumnType("INTEGER");
 
