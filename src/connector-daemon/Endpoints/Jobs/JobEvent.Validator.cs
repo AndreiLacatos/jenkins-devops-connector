@@ -22,6 +22,7 @@ internal static partial class JobEvent
                 .WithMessage("Git URL must not be empty.");
 
             RuleFor(x => x.Branch)
+                .NotNull()
                 .NotEmpty()
                 .WithMessage("Branch must not be empty.");
 

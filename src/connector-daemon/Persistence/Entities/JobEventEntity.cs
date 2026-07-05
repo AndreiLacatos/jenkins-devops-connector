@@ -22,6 +22,7 @@ internal sealed class JobEventEntity
         Name = jobEvent.Name,
         Build = jobEvent.Build,
         Commit = jobEvent.Commit,
+        Branch = jobEvent.Branch,
         GitUrl = jobEvent.GitUrl,
         JobEvent = jobEvent.Status switch
         {

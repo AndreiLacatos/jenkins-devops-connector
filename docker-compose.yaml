@@ -1,6 +1,25 @@
 version: "3.9"
 
 services:
+  traefik:
+    image: traefik:v3.7.6
+    container_name: connector-traefik
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    networks:
+      - jenkins-azure-connector
+
   connector-daemon:
     image: ${CONNECTOR_DAEMON_IMAGE}
     container_name: connector-daemon
@@ -20,13 +39,19 @@ services:
     networks:
       - jenkins-azure-connector
 
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.daemon.rule=PathPrefix(`/api/v1/job-events`)
+      - traefik.http.routers.daemon.entrypoints=web
+      - traefik.http.services.daemon.loadbalancer.server.port=5739
+
   dashboard:
     image: ${CONNECTOR_DASHBOARD_IMAGE}
     container_name: connector-dashboard
     restart: unless-stopped
 
-    ports:
-      - "80:5741"
+    expose:
+      - "5741"
 
     environment:
       DaemonClientOptions__UrlBase: "http://connector-daemon:5739"
@@ -36,6 +61,12 @@ services:
 
     networks:
       - jenkins-azure-connector
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=PathPrefix(`/`)
+      - traefik.http.routers.dashboard.entrypoints=web
+      - traefik.http.services.dashboard.loadbalancer.server.port=5741
 
 networks:
   jenkins-azure-connector:
