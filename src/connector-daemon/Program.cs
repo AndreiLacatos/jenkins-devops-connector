@@ -43,6 +43,7 @@ builder.Services
     .AddCheck<PersistenceHealthCheck>(
         name: "PERSISTENCE",
         failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
+builder.Services.Configure<PullRequestWatcherOptions>(builder.Configuration);
 
 var app = builder.Build();
 

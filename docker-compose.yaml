@@ -32,6 +32,7 @@ services:
       AzureClientOptions__OrganizationUrl: ${AZURE_ORGANIZATION_URL}
       AzureClientOptions__Pat: ${AZURE_PAT}
       ConnectionStrings__DefaultConnection: "Data Source=/data/jobs.db"
+      PullRequestRefreshIntervalMinutes: ${PULL_REQUEST_REFRESH_INTERVAL_MINUTES}
 
     volumes:
       - ${DATA_DIR}:/data
