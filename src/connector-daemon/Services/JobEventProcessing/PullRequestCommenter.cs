@@ -27,7 +27,7 @@ internal sealed class PullRequestCommenter
             {
                 Content = string.IsNullOrWhiteSpace(job.BuildUrl)
                     ? $"Jenkins build #{job.Build} failed."
-                    : @$"\u26D4 Jenkins job [{job.Name} #{job.Build}]({job.BuildUrl}) failed.",
+                    : $"⛔ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) failed.",
             }.TurnIntoConnectorSystemComment();
             var threads = await _azureClient.ListPullRequestThreadsAsync(repo, pullRequest, cancellationToken);
             var thread = threads.GetJenkinsPipelineThread();
@@ -56,7 +56,7 @@ internal sealed class PullRequestCommenter
                 {
                     Content = string.IsNullOrWhiteSpace(job.BuildUrl)
                         ? $"Jenkins build #{job.Build} succeeded."
-                        : @$"\u2705 Jenkins job [{job.Name} #{job.Build}]({job.BuildUrl}) succeeded.",
+                        : $"✅ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) succeeded.",
                     ParentId = thread.GetRootComment()?.Id,
                 }.TurnIntoConnectorSystemComment();
                 await _azureClient.ResolvePullRequestThreadAsync(repo, pullRequest, thread, comment, cancellationToken);
