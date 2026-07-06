@@ -113,49 +113,8 @@ internal sealed class JobEventProcessor : IJobEventProcessor
                 {
                     // set PR status
                     await _azureClient.SetPrStatusAsync(azureRepo, azurePr, job, cancellationToken);
-
-                    if (job.Status is JenkinsPipelineStatus.Failed or JenkinsPipelineStatus.Aborted)
-                    {
-                        // Jenkins pipeline failed, add a comment
-                        var comment = new AzureThread.AzureThreadComment
-                        {
-                            Content = string.IsNullOrWhiteSpace(job.BuildUrl)
-                                ? $"Jenkins build #{job.Build} failed."
-                                : $"Jenkins [build #{job.Build}]({job.BuildUrl}) failed.",
-                        }.TurnIntoConnectorSystemComment();
-                        var threads = await _azureClient.ListPullRequestThreadsAsync(azureRepo, azurePr, cancellationToken);
-                        var thread = threads.GetJenkinsPipelineThread();
-                        if (thread is null)
-                        {
-                            // there is no thread regarding Jenkins pipeline status yet, create it with the comment
-                            await _azureClient.AddPullRequestThreadAsync(azureRepo, azurePr, comment, cancellationToken);
-                        }
-                        else
-                        {
-                            // add another comment to the existing thread
-                            comment.ParentId = thread.GetRootComment()?.Id;
-                            await _azureClient.AddPullRequestCommentAsync(azureRepo, azurePr, thread, comment, cancellationToken);
-                        }
-                    }
-
-                    if (job.Status == JenkinsPipelineStatus.Succeeded)
-                    {
-                        // Jenkins pipeline succeeded, if there is a comment on the PR,
-                        // respond to it and resolve thread
-                        var threads = await _azureClient.ListPullRequestThreadsAsync(azureRepo, azurePr, cancellationToken);
-                        var thread = threads.GetJenkinsPipelineThread();
-                        if (thread is not null)
-                        {
-                            var comment = new AzureThread.AzureThreadComment
-                            {
-                                Content = string.IsNullOrWhiteSpace(job.BuildUrl)
-                                    ? $"Jenkins build #{job.Build} succeeded."
-                                    : $"Jenkins [build #{job.Build}]({job.BuildUrl}) succeeded.",
-                                ParentId = thread.GetRootComment()?.Id,
-                            }.TurnIntoConnectorSystemComment();
-                            await _azureClient.ResolvePullRequestThreadAsync(azureRepo, azurePr, thread, comment, cancellationToken);
-                        }
-                    }
+                    var commenter = new PullRequestCommenter(_azureClient);
+                    await commenter.AddPipelineStatusCommentAsync(azureRepo, azurePr, job, cancellationToken);
                 }
             }
 

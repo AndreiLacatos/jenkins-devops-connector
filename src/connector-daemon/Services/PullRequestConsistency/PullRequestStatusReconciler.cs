@@ -56,6 +56,8 @@ internal sealed class PullRequestStatusReconciler : IPullRequestStatusReconciler
                 if (mostRecentEvent is not null)
                 {
                     await _azureClient.SetPrStatusAsync(azureRepo, pullRequest, mostRecentEvent, cancellationToken);
+                    var commenter = new PullRequestCommenter(_azureClient);
+                    await commenter.AddPipelineStatusCommentAsync(azureRepo, pullRequest, mostRecentEvent, cancellationToken);
                 }
             }
         }
