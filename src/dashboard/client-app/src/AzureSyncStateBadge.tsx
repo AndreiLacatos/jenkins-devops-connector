@@ -47,14 +47,17 @@ export function AzureSyncStateBadge({
       : "bg-slate-100 text-slate-600 border-slate-200";
 
   return (
-    <div className="flex flex-col items-end leading-tight">
-      <span className={`${base} ${color}`}>
-        {status}
-      </span>
+    <div className="flex flex-row items-baseline gap-2">
+      <div className="text-sm text-slate-700">Azure sync</div>
+      <div className="flex flex-col items-end leading-tight">
+        <span className={`${base} ${color}`}>
+          {status}
+        </span>
 
-      <span className="text-[11px] text-slate-500 mt-0.5">
-        {relative}
-      </span>
+        <span className="text-[11px] text-slate-500 mt-0.5">
+          {relative}
+        </span>
+      </div>
     </div>
   );
 }
