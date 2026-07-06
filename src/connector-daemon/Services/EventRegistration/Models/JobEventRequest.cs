@@ -7,6 +7,6 @@ internal sealed class JobEventRequest
     public required string Commit { get; init; }
     public required string Branch { get; init; }
     public required string GitUrl { get; init; }
-    public required JobStatus Status { get; init; }
+    public required JenkinsPipelineStatus Status { get; init; }
     public required string? Url { get; init; }
 }

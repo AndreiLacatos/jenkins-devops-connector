@@ -9,7 +9,7 @@ internal sealed class Job
     public required string GitUrl { get; init; }
     public required string Commit { get; init; }
     public required string Branch { get; init; }
-    public required JobStatus Status { get; init; }
+    public required JenkinsPipelineStatus Status { get; init; }
     public required string? BuildUrl { get; init; }
     public required DateTimeOffset RegisteredAt { get; set; }
     public required SyncStatus SyncStatus { get; set; }

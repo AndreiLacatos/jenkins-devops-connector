@@ -53,9 +53,9 @@ internal static class JobEventGET
             RegisteredAt = job.RegisteredAt.ToString("O"),
             JenkinsStatus = job.Status switch
             {
-                JobStatus.Started => "started",
-                JobStatus.Succeeded => "succeeded",
-                JobStatus.Failed => "failed",
+                JenkinsPipelineStatus.Started => "started",
+                JenkinsPipelineStatus.Succeeded => "succeeded",
+                JenkinsPipelineStatus.Failed => "failed",
                 _ => "aborted",
             },
             SyncStatus = job.SyncStatus switch

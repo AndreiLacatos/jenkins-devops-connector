@@ -26,9 +26,9 @@ internal sealed class JobEventEntity
         GitUrl = jobEvent.GitUrl,
         JobEvent = jobEvent.Status switch
         {
-            JobStatus.Started => JobEvents.Started,
-            JobStatus.Succeeded => JobEvents.Succeeded,
-            JobStatus.Failed => JobEvents.Failed,
+            JenkinsPipelineStatus.Started => JobEvents.Started,
+            JenkinsPipelineStatus.Succeeded => JobEvents.Succeeded,
+            JenkinsPipelineStatus.Failed => JobEvents.Failed,
             _ => JobEvents.Aborted,
         },
         Url = jobEvent.BuildUrl,

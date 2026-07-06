@@ -1,6 +1,6 @@
 namespace connector_daemon.Services.EventRegistration.Models;
 
-internal enum JobStatus
+internal enum JenkinsPipelineStatus
 {
     Started = 0,
     Succeeded = 1,

@@ -286,6 +286,90 @@ internal sealed class AzureClient : IAzureClient, IDisposable
         return mappedPrs;
     }
 
+    public async Task<IEnumerable<AzureThread>> ListPullRequestThreadsAsync(
+        AzureRepo repo, AzurePullRequest pr, CancellationToken cancellationToken)
+    {
+        var results = new List<AzureThread>();
+        var threads = await _gitClient.GetThreadsAsync(repo.Id, pr.Id, cancellationToken: cancellationToken);
+        foreach (var thread in threads.Where(t => !t.IsDeleted))
+        {
+            var comments = await _gitClient.GetCommentsAsync(
+                repo.Id, pr.Id, thread.Id, cancellationToken: cancellationToken) ?? [];
+            results.Add(new AzureThread
+            {
+                Id = thread.Id,
+                Comments = comments.Where(c => !c.IsDeleted).Select(c => new AzureThread.AzureThreadComment
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    PublishedAt = c.PublishedDate,
+                    ParentId = c.ParentCommentId,
+                }),
+            });
+        }
+
+        return results;
+    }
+
+    public async Task AddPullRequestCommentAsync(
+        AzureRepo repo, AzurePullRequest pr, AzureThread thread,
+        AzureThread.AzureThreadComment comment, CancellationToken cancellationToken)
+    {
+        var gitThread = new GitPullRequestCommentThread
+        {
+            Id = thread.Id,
+            Status = CommentThreadStatus.Active,
+            Comments = [
+                new Comment
+                {
+                    Content = comment.Content,
+                    CommentType = CommentType.Text,
+                    ParentCommentId = comment.ParentId ?? 0,
+                },
+            ],
+        };
+        await _gitClient.UpdateThreadAsync(gitThread, repo.Id, pr.Id, thread.Id, cancellationToken: cancellationToken);
+    }
+
+    public async Task AddPullRequestThreadAsync(
+        AzureRepo repo, AzurePullRequest pr,
+        AzureThread.AzureThreadComment comment, CancellationToken cancellationToken)
+    {
+        var gitThread = new GitPullRequestCommentThread
+        {
+            Status = CommentThreadStatus.Active,
+            Comments = [
+                new Comment
+                {
+                    Content = comment.Content,
+                    CommentType = CommentType.Text,
+                    ParentCommentId = 0,
+                },
+            ],
+        };
+        await _gitClient.CreateThreadAsync(gitThread, repo.Id, pr.Id, cancellationToken: cancellationToken);
+    }
+
+    public async Task ResolvePullRequestThreadAsync(
+        AzureRepo repo, AzurePullRequest pr, AzureThread thread,
+        AzureThread.AzureThreadComment comment, CancellationToken cancellationToken)
+    {
+        var gitThread = new GitPullRequestCommentThread
+        {
+            Id = thread.Id,
+            Status = CommentThreadStatus.Fixed,
+            Comments = [
+                new Comment
+                {
+                    Content = comment.Content,
+                    CommentType = CommentType.Text,
+                    ParentCommentId = comment.ParentId ?? 0,
+                },
+            ],
+        };
+        await _gitClient.UpdateThreadAsync(gitThread, repo.Id, pr.Id, thread.Id, cancellationToken: cancellationToken);
+    }
+
     public async Task SetCommitStatusAsync(
         AzureRepo repo, AzureCommit commit, JobEvent status, CancellationToken cancellationToken)
     {
@@ -377,17 +461,17 @@ internal sealed class AzureClient : IAzureClient, IDisposable
         _ => AzureStateEnum.Other,
     };
 
-    private static GitStatusState MapAzureState(JobStatus s) => s switch
+    private static GitStatusState MapAzureState(JenkinsPipelineStatus s) => s switch
     {
-        JobStatus.Started => GitStatusState.Pending,
-        JobStatus.Succeeded => GitStatusState.Succeeded,
+        JenkinsPipelineStatus.Started => GitStatusState.Pending,
+        JenkinsPipelineStatus.Succeeded => GitStatusState.Succeeded,
         _ => GitStatusState.Failed,
     };
 
-    private static string MapDescription(JobStatus s) => s switch
+    private static string MapDescription(JenkinsPipelineStatus s) => s switch
     {
-        JobStatus.Started => "Jenkins build running",
-        JobStatus.Succeeded => "Jenkins build succeeded",
+        JenkinsPipelineStatus.Started => "Jenkins build running",
+        JenkinsPipelineStatus.Succeeded => "Jenkins build succeeded",
         _ => "Jenkins build failed",
     };
 }

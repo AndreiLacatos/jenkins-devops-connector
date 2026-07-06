@@ -12,6 +12,17 @@ internal interface IAzureClient
         AzureRepo repo, CancellationToken cancellationToken);
     Task<IEnumerable<AzurePullRequest>> ListAssociatedActivePullRequestsAsync(
         AzureRepo repo, AzureCommit commit, CancellationToken cancellationToken);
+    Task<IEnumerable<AzureThread>> ListPullRequestThreadsAsync(
+        AzureRepo repo, AzurePullRequest pr, CancellationToken cancellationToken);
+    Task AddPullRequestCommentAsync(
+        AzureRepo repo, AzurePullRequest pr, AzureThread thread,
+        AzureThread.AzureThreadComment comment, CancellationToken cancellationToken);
+    Task AddPullRequestThreadAsync(
+        AzureRepo repo, AzurePullRequest pr,
+        AzureThread.AzureThreadComment comment, CancellationToken cancellationToken);
+    Task ResolvePullRequestThreadAsync(
+        AzureRepo repo, AzurePullRequest pr, AzureThread thread,
+        AzureThread.AzureThreadComment comment, CancellationToken cancellationToken);
     Task SetCommitStatusAsync(AzureRepo repo, AzureCommit commit, JobEvent status, CancellationToken cancellationToken);
     Task SetPrStatusAsync(AzureRepo repo, AzurePullRequest pr, JobEvent status, CancellationToken cancellationToken);
 }

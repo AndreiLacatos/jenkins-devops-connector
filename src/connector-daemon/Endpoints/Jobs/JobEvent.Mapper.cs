@@ -16,10 +16,10 @@ internal static partial class JobEvent
                 Branch = apiModel.Branch!,
                 Status = apiModel.Status!.ToLowerInvariant() switch
                 {
-                    "started" => JobStatus.Started,
-                    "success" => JobStatus.Succeeded,
-                    "failure" => JobStatus.Failed,
-                    _ => JobStatus.Aborted,
+                    "started" => JenkinsPipelineStatus.Started,
+                    "success" => JenkinsPipelineStatus.Succeeded,
+                    "failure" => JenkinsPipelineStatus.Failed,
+                    _ => JenkinsPipelineStatus.Aborted,
                 },
                 Url = apiModel.BuildUrl,
             };

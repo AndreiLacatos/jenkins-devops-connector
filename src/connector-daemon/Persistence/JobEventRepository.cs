@@ -193,20 +193,20 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
         FinishedAt = e.FinishedAt is null ? null : DateTimeOffset.Parse(e.FinishedAt),
     };
 
-    private static string MapStatus(JobStatus s) => s switch
+    private static string MapStatus(JenkinsPipelineStatus s) => s switch
     {
-        JobStatus.Started => JobEvents.Started,
-        JobStatus.Succeeded => JobEvents.Succeeded,
-        JobStatus.Failed => JobEvents.Failed,
+        JenkinsPipelineStatus.Started => JobEvents.Started,
+        JenkinsPipelineStatus.Succeeded => JobEvents.Succeeded,
+        JenkinsPipelineStatus.Failed => JobEvents.Failed,
         _ => JobEvents.Aborted,
     };
 
-    private static JobStatus MapStatus(string s) => s switch
+    private static JenkinsPipelineStatus MapStatus(string s) => s switch
     {
-        JobEvents.Started => JobStatus.Started,
-        JobEvents.Succeeded => JobStatus.Succeeded,
-        JobEvents.Failed => JobStatus.Failed,
-        _ => JobStatus.Aborted,
+        JobEvents.Started => JenkinsPipelineStatus.Started,
+        JobEvents.Succeeded => JenkinsPipelineStatus.Succeeded,
+        JobEvents.Failed => JenkinsPipelineStatus.Failed,
+        _ => JenkinsPipelineStatus.Aborted,
     };
 
     private static SyncStatus MapSyncStatus(string s) => s switch
