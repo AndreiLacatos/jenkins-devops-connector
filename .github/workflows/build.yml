@@ -14,7 +14,6 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}
 
 jobs:
   docker:
@@ -35,6 +34,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Normalize image namespace
+        shell: bash
+        run: |
+          echo "IMAGE_NAMESPACE=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
 
       - name: Compute version
         shell: bash
@@ -67,20 +71,24 @@ jobs:
       - name: Determine image tags
         shell: bash
         run: |
-          IMAGE="${REGISTRY}/${IMAGE_PREFIX}/${{ matrix.image }}"
+          IMAGE="${REGISTRY}/${IMAGE_NAMESPACE}/${{ matrix.image }}"
 
-          TAGS="${IMAGE}:${VERSION}"
+          {
+            echo "IMAGE=${IMAGE}"
 
-          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-              TAGS="${TAGS},${IMAGE}:latest"
-          elif [[ "${GITHUB_REF_NAME}" == "master" ]]; then
-              TAGS="${TAGS},${IMAGE}:latest"
-          elif [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
-              TAGS="${TAGS},${IMAGE}:latest-dev"
-          fi
+            echo "TAGS<<EOF"
+            echo "${IMAGE}:${VERSION}"
 
-          echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
-          echo "TAGS=${TAGS}" >> "$GITHUB_ENV"
+            if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+              echo "${IMAGE}:latest"
+            elif [[ "${GITHUB_REF_NAME}" == "master" ]]; then
+              echo "${IMAGE}:latest"
+            elif [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+              echo "${IMAGE}:latest-dev"
+            fi
+
+            echo "EOF"
+          } >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
