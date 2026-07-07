@@ -55,7 +55,11 @@ internal class JobListService : IJobListService
                     .Where(kvp => azureBranchesWithPrs.Contains(NormalizeBranchName(kvp.Key)))
                     .ToDictionary(
                         kvp => kvp.Key,
-                        kvp => Map(kvp.Value.MaxBy(j => DateTimeOffset.Parse(j.RegisteredAt))!));
+                        kvp => kvp.Value
+                            .GroupBy(job => job.Name, job => job)
+                            .ToDictionary(
+                                group => group.Key,
+                                group => Map(group.MaxBy(j => DateTimeOffset.Parse(j.RegisteredAt))!)));
                 result.Add(new RepositoryJobs
                 {
                     RepositoryName = repoJobs.RepositoryName,

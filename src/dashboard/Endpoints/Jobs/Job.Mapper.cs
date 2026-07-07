@@ -12,7 +12,11 @@ internal static partial class Job
             Jobs = jobs.Select(jobSet => new RepositoryJobsApiModel
             {
                 RepositoryName = jobSet.RepositoryName,
-                BranchJobs = jobSet.BranchJobs.ToDictionary(kvp => kvp.Key, kvp => Map(kvp.Value)),
+                BranchJobs = jobSet.BranchJobs
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        IDictionary<string, JobApiModel> (kvp) => kvp.Value
+                            .ToDictionary(inner => inner.Key, inner => Map(inner.Value))),
             }),
         };
     }

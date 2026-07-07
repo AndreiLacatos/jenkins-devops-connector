@@ -16,7 +16,7 @@ internal static partial class Job
         public required string RepositoryName { get; init; }
 
         [JsonPropertyName("branchJobs")]
-        public required IDictionary<string, JobApiModel> BranchJobs { get; init; }
+        public required IDictionary<string, IDictionary<string, JobApiModel>> BranchJobs { get; init; }
     }
     
     internal sealed class JobApiModel

@@ -42,11 +42,10 @@ export default function JobsDashboard() {
                 <button
                   key={repo.repository}
                   onClick={() => setSelectedRepo(repo.repository)}
-                  className={`px-3 py-1 text-sm rounded cursor-pointer transition border ${
-                    activeRepo?.repository === repo.repository
-                      ? "bg-cyan-600 text-white border-cyan-600"
-                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                  }`}
+                  className={`px-3 py-1 text-sm rounded cursor-pointer transition border ${activeRepo?.repository === repo.repository
+                    ? "bg-cyan-600 text-white border-cyan-600"
+                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                    }`}
                 >
                   {repo.repository}
                 </button>
@@ -81,14 +80,22 @@ export default function JobsDashboard() {
             {Object.entries(activeRepo.branchJobs)
               .sort(
                 ([, a], [, b]) =>
-                  new Date(b.registeredAt).getTime() -
-                  new Date(a.registeredAt).getTime()
+                  new Date(
+                    Math.max(
+                      ...Object.values(b).map(job => new Date(job.registeredAt).getTime())
+                    )
+                  ).getTime() -
+                  new Date(
+                    Math.max(
+                      ...Object.values(a).map(job => new Date(job.registeredAt).getTime())
+                    )
+                  ).getTime()
               )
-              .map(([branch, job]) => (
+              .map(([branch, jobs]) => (
                 <DashboardJobItem
                   key={branch}
                   branch={branch}
-                  job={job}
+                  jobs={jobs}
                 />
               ))}
           </div>

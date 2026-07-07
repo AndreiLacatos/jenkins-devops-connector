@@ -14,7 +14,7 @@ export type JobApiModel = {
 
 export type RepositoryJobsApiModel = {
     repository: string;
-    branchJobs: Record<string, JobApiModel>;
+    branchJobs: Record<string, Record<string, JobApiModel>>;
 };
 
 export type JobListResponseApiModel = {
