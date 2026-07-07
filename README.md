@@ -8,6 +8,7 @@ It synchronizes Jenkins pipeline results with Azure DevOps commits and pull requ
 
 These statuses can be used by Azure DevOps as pull request completion checks, ensuring that a pull request cannot be completed until the associated Jenkins pipeline has finished successfully.
 
+To provide Azure DevOps notifications, the connector creates discussion threads on pull requests to report Jenkins job statuses. Threads are spawned when a job fails and automatically resolved once it succeeds, preventing conflicts with Azure DevOps pull request comment policies.
 
 ## Installation
 
@@ -23,7 +24,43 @@ These statuses can be used by Azure DevOps as pull request completion checks, en
 > * Jenkins can send requests to the service.
 > * The service can communicate with Azure DevOps.
 
-## Configuration
+### Application settings
+
+Before starting the stack with `docker compose`, provide the minimum required configuration, for example in a `.env` file:
+
+```sh
+CONNECTOR_DAEMON_IMAGE=ghcr.io/andreilacatos/jenkins-devops-connector/connector-daemon:1.2.0
+CONNECTOR_DASHBOARD_IMAGE=ghcr.io/andreilacatos/jenkins-devops-connector/connector-dashboard:1.2.0
+AZURE_ORGANIZATION_URL=https://dev.azure.com/your-org
+AZURE_PAT=your-pat
+DATA_DIR=/opt/connector-daemon/data # Docker mount point or volume
+```
+
+#### Advanced settings
+
+The following options can be used to fine-tune the service.
+
+**Pull request scan interval**
+
+Controls how often pull requests are scanned for retroactive synchronization of Jenkins job statuses. This ensures that pull requests created after a Jenkins job has already run eventually receive the correct pipeline status.
+
+A value of **15–60 minutes** is generally recommended.
+
+```sh
+PULL_REQUEST_REFRESH_INTERVAL_MINUTES=30
+```
+
+**Commenting strategy**
+
+By default, the application creates a separate Azure discussion thread for each Jenkins job. This is especially useful in monorepos, where multiple jobs (for example, `build-app-A`, `build-app-B`, and `build-common`) report independently. Each job updates its own discussion thread, so the status of one job never overwrites or obscures another.
+
+If you prefer a single discussion thread for all jobs, set the strategy to `single`. To disable pull request comments entirely, use `none`.
+
+```sh
+COMMENTING_STRATEGY=job # single, none
+```
+
+## Integration Configuration
 
 The application requires a small amount of configuration in both Jenkins and Azure DevOps.
 

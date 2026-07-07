@@ -2,6 +2,7 @@ using connector_daemon.AzureIntegration;
 using connector_daemon.AzureIntegration.Models;
 using connector_daemon.Persistence;
 using connector_daemon.Services.EventRegistration.Models;
+using connector_daemon.Services.JobEventProcessing.CommentingStrategy;
 
 namespace connector_daemon.Services.JobEventProcessing;
 
@@ -10,17 +11,20 @@ internal sealed class JobEventProcessor : IJobEventProcessor
     private readonly ILogger<JobEventProcessor> _logger;
     private readonly IJobEventProcessingStatusRepository _repository;
     private readonly IAzureClient _azureClient;
+    private readonly ICommentingStrategyFactory _commentingStrategyFactory;
     private readonly MonitoredRepositories _monitoredRepositories;
 
     public JobEventProcessor(
         ILogger<JobEventProcessor> logger,
         IJobEventProcessingStatusRepository repository,
         IAzureClient azureClient,
+        ICommentingStrategyFactory commentingStrategyFactory,
         MonitoredRepositories monitoredRepositories)
     {
         _logger = logger;
         _repository = repository;
         _azureClient = azureClient;
+        _commentingStrategyFactory = commentingStrategyFactory;
         _monitoredRepositories = monitoredRepositories;
     }
 
@@ -112,8 +116,12 @@ internal sealed class JobEventProcessor : IJobEventProcessor
                 {
                     // set PR status
                     await _azureClient.SetPrStatusAsync(azureRepo, azurePr, job, cancellationToken);
-                    var commenter = new PullRequestCommenter(_azureClient);
-                    await commenter.AddPipelineStatusCommentAsync(azureRepo, azurePr, job, cancellationToken);
+                    var strategy = _commentingStrategyFactory.GetCommentingStrategy();
+                    if (strategy is not null)
+                    {
+                        var commenter = new PullRequestCommenter(_azureClient, strategy);
+                        await commenter.AddPipelineStatusCommentAsync(azureRepo, azurePr, job, cancellationToken);
+                    }
                 }
             }
 

@@ -14,7 +14,12 @@ internal static partial class PullRequestThreadExtensions
     {
         public AzureThread? GetJenkinsPipelineThread()
         {
-            return threads.FirstOrDefault(
+            return threads.GetJenkinsPipelineThreads().FirstOrDefault();
+        }
+
+        public IEnumerable<AzureThread> GetJenkinsPipelineThreads()
+        {
+            return threads.Where(
                 thread => thread.Comments.Any(comment => comment.IsConnectorSystemComment()));
         }
     }

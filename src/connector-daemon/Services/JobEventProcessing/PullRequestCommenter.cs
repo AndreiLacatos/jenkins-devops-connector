@@ -1,6 +1,7 @@
 using connector_daemon.AzureIntegration;
 using connector_daemon.AzureIntegration.Models;
 using connector_daemon.Services.EventRegistration.Models;
+using connector_daemon.Services.JobEventProcessing.CommentingStrategy;
 using connector_daemon.Services.JobEventProcessing.CommentMetadata;
 using connector_daemon.Services.JobEventProcessing.Extensions;
 
@@ -9,10 +10,14 @@ namespace connector_daemon.Services.JobEventProcessing;
 internal sealed class PullRequestCommenter
 {
     private readonly IAzureClient _azureClient;
+    private readonly ICommentingStrategy _strategy;
 
-    public PullRequestCommenter(IAzureClient azureClient)
+    public PullRequestCommenter(
+        IAzureClient azureClient,
+        ICommentingStrategy strategy)
     {
         _azureClient = azureClient;
+        _strategy = strategy;
     }
 
     internal async Task AddPipelineStatusCommentAsync(
@@ -31,7 +36,7 @@ internal sealed class PullRequestCommenter
                     : $"⛔ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) failed.",
             }.TurnIntoConnectorSystemComment(new CommentMetadataV1 { JenkinsJob = job.Name, JenkinsJobSuccessful = false });
             var threads = await _azureClient.ListPullRequestThreadsAsync(repo, pullRequest, cancellationToken);
-            var thread = threads.GetJenkinsPipelineThread();
+            var thread = _strategy.GetTargetThread(threads, job);
             if (thread is null)
             {
                 // there is no thread regarding Jenkins pipeline status yet, create it with the comment
@@ -50,7 +55,7 @@ internal sealed class PullRequestCommenter
             // Jenkins pipeline succeeded, if there is a comment on the PR regarding the failure,
             // respond to it and resolve thread (unless the most recent comment already indicates success)
             var threads = await _azureClient.ListPullRequestThreadsAsync(repo, pullRequest, cancellationToken);
-            var thread = threads.GetJenkinsPipelineThread();
+            var thread = _strategy.GetTargetThread(threads, job);
             if (thread is not null)
             {
                 var meta = thread.GetMostRecentComment()?.GetThreadMetadata();

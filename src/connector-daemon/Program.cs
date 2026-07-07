@@ -7,6 +7,7 @@ using connector_daemon.HealthChecks;
 using connector_daemon.Persistence;
 using connector_daemon.Services.EventRegistration;
 using connector_daemon.Services.JobEventProcessing;
+using connector_daemon.Services.JobEventProcessing.CommentingStrategy;
 using connector_daemon.Services.PullRequestConsistency;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,8 @@ builder.Services
         name: "PERSISTENCE",
         failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy);
 builder.Services.Configure<PullRequestWatcherOptions>(builder.Configuration);
+builder.Services.Configure<CommentingStrategyOptions>(builder.Configuration);
+builder.Services.AddTransient<ICommentingStrategyFactory, CommentingStrategyFactory>();
 
 var app = builder.Build();
 
