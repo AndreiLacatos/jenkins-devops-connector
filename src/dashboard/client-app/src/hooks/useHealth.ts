@@ -18,7 +18,7 @@ export function useHealth() {
       try {
         setLoading(true);
 
-        const res = await fetch("api/daemon-health");
+        const res = await fetch("/api/daemon-health");
 
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);

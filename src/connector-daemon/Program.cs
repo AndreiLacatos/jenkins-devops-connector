@@ -53,6 +53,7 @@ var app = builder.Build();
 app.MapHealthCheck();
 app.MapJobEventWebhook();
 app.MapJobEventQueries();
+app.MapJobEventManualRequeue();
 
 var scope = app.Services.CreateAsyncScope();
 var lifetime = scope.ServiceProvider.GetRequiredService<IHostApplicationLifetime>();

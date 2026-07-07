@@ -38,4 +38,12 @@ internal sealed class DaemonClient : IDaemonClient
         var payload = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize<Health>(payload)!;
     }
+
+    public async Task RequeueJobAsync(string name, int build, string commit, CancellationToken cancellationToken)
+    {
+        using var client = _httpClientFactory.CreateClient(nameof(DaemonClient));
+        var uri = new Uri($"/api/system/jobs/{Uri.EscapeDataString(name)}/{build}/{Uri.EscapeDataString(commit)}/requeue");
+        var response = await client.PostAsync(uri, null, cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
 }

@@ -36,7 +36,7 @@ export function useRecentJobs() {
                     setLoading(true);
                 }
 
-                const res = await fetch("api/recent-jobs");
+                const res = await fetch("/api/recent-jobs");
 
                 if (!res.ok) {
                     throw new Error(`HTTP ${res.status}`);

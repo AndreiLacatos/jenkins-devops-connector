@@ -7,15 +7,18 @@ internal sealed class JobEventRegistrar : IJobEventRegistrar
 {
     private readonly ILogger<JobEventRegistrar> _logger;
     private readonly IJobEventRepository _jobEventRepository;
+    private readonly IJobEventProcessingStatusRepository _jobEventProcessingStatusRepository;
     private readonly TimeProvider _timeProvider;
 
     public JobEventRegistrar(
         ILogger<JobEventRegistrar> logger,
         IJobEventRepository jobEventRepository,
+        IJobEventProcessingStatusRepository jobEventProcessingStatusRepository,
         TimeProvider timeProvider)
     {
         _logger = logger;
         _jobEventRepository = jobEventRepository;
+        _jobEventProcessingStatusRepository = jobEventProcessingStatusRepository;
         _timeProvider = timeProvider;
     }
 
@@ -53,5 +56,22 @@ internal sealed class JobEventRegistrar : IJobEventRegistrar
         await _jobEventRepository.SaveJobEventAsync(
             JobEvent.FromRequest(request, _timeProvider.GetUtcNow()),
             cancellationToken);
+    }
+
+    public async Task RequeueJobEventAsync(JobEventRequeueRequest request, CancellationToken cancellationToken)
+    {
+        var jobs = await _jobEventRepository.ListJobEventsAsync(
+            new JobEventListFilter
+            {
+                JobName = request.Name,
+                Build = request.Build,
+                Commit = request.Commit,
+            },
+            cancellationToken);
+        foreach (var job in jobs)
+        {
+            await _jobEventProcessingStatusRepository.MarkJobEventPendingAsync(job, cancellationToken);
+            _logger.LogInformation("Requeued job {JobName} #{Build}", job.Name, job.Build);
+        }
     }
 }

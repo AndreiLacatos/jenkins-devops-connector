@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IJobListService, JobListService>();
+builder.Services.AddScoped<IJobQueueService, JobQueueService>();
 builder.Services.AddScoped<IDaemonClient, DaemonClient>();
 builder.Services.Configure<DaemonClientOptions>(
     builder.Configuration.GetSection(nameof(DaemonClientOptions)));
@@ -41,6 +42,7 @@ app.UseCors();
 app.MapStaticAssets();
 app.MapDaemonHealth();
 app.MapJobList();
+app.MapRequeueJob();
 app.MapFallbackToFile("index.html");
 
 app.Run();

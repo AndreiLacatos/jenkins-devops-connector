@@ -104,7 +104,7 @@ internal sealed class JobEventRepository : IJobEventRepository, IJobEventProcess
     public Task MarkJobEventPendingAsync(JobEvent jobEvent, CancellationToken cancellationToken)
         => UpdateJobEventAsync(
             jobEvent,
-            SyncStatuses.Enqueued,
+            SyncStatuses.Pending,
             s => s
                 .SetProperty(e => e.EnqueuedAt, _timeProvider.GetUtcNow().ToString("O"))
                 .SetProperty(e => e.FinishedAt, (string?)null),

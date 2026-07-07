@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useRecentJobs } from "./hooks/useRecentJobs";
-import DashboardJobItem from "./DashboardJobItem";
+import DashboardBranchItem from "./DashboardBranchItem";
 
 export default function JobsDashboard() {
   const { data, loading, error } = useRecentJobs();
@@ -92,7 +92,7 @@ export default function JobsDashboard() {
                   ).getTime()
               )
               .map(([branch, jobs]) => (
-                <DashboardJobItem
+                <DashboardBranchItem
                   key={branch}
                   branch={branch}
                   jobs={jobs}

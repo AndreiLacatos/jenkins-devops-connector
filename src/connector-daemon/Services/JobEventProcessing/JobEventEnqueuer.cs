@@ -23,6 +23,7 @@ internal sealed class JobEventEnqueuer : IJobEventEnqueuer
         foreach (var job in jobs)
         {
             await _channelWriter.WriteAsync(job, cancellationToken);
+            await _jobEventRepository.MarkJobEventEnqueuedAsync(job, cancellationToken);
         }
     }
 }
