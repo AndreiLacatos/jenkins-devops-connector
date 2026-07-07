@@ -1,6 +1,7 @@
 using connector_daemon.AzureIntegration;
 using connector_daemon.AzureIntegration.Models;
 using connector_daemon.Services.EventRegistration.Models;
+using connector_daemon.Services.JobEventProcessing.CommentMetadata;
 using connector_daemon.Services.JobEventProcessing.Extensions;
 
 namespace connector_daemon.Services.JobEventProcessing;
@@ -28,7 +29,7 @@ internal sealed class PullRequestCommenter
                 Content = string.IsNullOrWhiteSpace(job.BuildUrl)
                     ? $"Jenkins build #{job.Build} failed."
                     : $"⛔ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) failed.",
-            }.TurnIntoConnectorSystemComment();
+            }.TurnIntoConnectorSystemComment(new CommentMetadataV1 { JenkinsJob = job.Name, JenkinsJobSuccessful = false });
             var threads = await _azureClient.ListPullRequestThreadsAsync(repo, pullRequest, cancellationToken);
             var thread = threads.GetJenkinsPipelineThread();
             if (thread is null)
@@ -58,7 +59,7 @@ internal sealed class PullRequestCommenter
                         ? $"Jenkins build #{job.Build} succeeded."
                         : $"✅ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) succeeded.",
                     ParentId = thread.GetRootComment()?.Id,
-                }.TurnIntoConnectorSystemComment();
+                }.TurnIntoConnectorSystemComment(new CommentMetadataV1 { JenkinsJob = job.Name, JenkinsJobSuccessful = true });
                 await _azureClient.ResolvePullRequestThreadAsync(repo, pullRequest, thread, comment, cancellationToken);
             }
         }
