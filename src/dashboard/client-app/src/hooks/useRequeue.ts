@@ -12,7 +12,7 @@ export function useRequeue() {
         setLoading(true);
         try {
             const res = await fetch(
-                `/pi/jobs/${encodeURIComponent(name)}/${build}/${encodeURIComponent(commit)}/requeue`,
+                `/api/jobs/${encodeURIComponent(name)}/${build}/${encodeURIComponent(commit)}/requeue`,
                 { method: 'POST' });
 
             if (!res.ok) {
