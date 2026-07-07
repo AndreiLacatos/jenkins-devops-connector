@@ -57,6 +57,8 @@ services:
 
     environment:
       DaemonClientOptions__UrlBase: "http://connector-daemon:5739"
+      AzureClientOptions__OrganizationUrl: ${AZURE_ORGANIZATION_URL}
+      AzureClientOptions__Pat: ${AZURE_PAT}
 
     depends_on:
       - connector-daemon
