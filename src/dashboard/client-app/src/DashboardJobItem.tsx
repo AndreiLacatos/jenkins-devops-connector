@@ -9,16 +9,13 @@ function DashboardJobItem({
 }: {
     job: Job;
 }) {
-    const { submit, loading: requeuing, error } = useRequeue();
+    const { submit, loading: requeuing } = useRequeue();
 
     const handleRequeue = async () => {
-        try {
-            await submit(job.name, job.build, job.commit);
-
-            if (!error) {
-                alert("Job queued successfully. It will be picked up shortly.");
-            }
-        } catch {
+        const success = await submit(job.name, job.build, job.commit);
+        if (success) {
+            alert("Job queued successfully. It will be picked up shortly.");
+        } else {
             alert("Failed to queue job. Please try again later.");
         }
     };
@@ -67,7 +64,7 @@ function DashboardJobItem({
                     disabled={requeuing}
                     title="Requeue job"
                     className="
-                        flex h-10 w-10 items-center justify-center
+                        flex h-8 w-8 items-center justify-center
                         rounded-full
                         border border-cyan-200
                         text-cyan-600
@@ -79,9 +76,9 @@ function DashboardJobItem({
                     "
                 >
                     {requeuing ? (
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                        <Play className="h-6 w-6 fill-current" />
+                        <Play className="h-4 w-4 fill-current" />
                     )}
                 </button>
             </div>

@@ -1,32 +1,31 @@
 import { useState } from "react";
 
 export function useRequeue() {
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const submit = async (name: string, build: number, commit: string) => {
         if (loading) {
-            return;
+            return false;
         }
 
         setLoading(true);
         try {
             const res = await fetch(
-                `/api/jobs/${name}/${build}/${commit}/requeue`,
-                { method: 'POST' });
+                `/api/jobs/${encodeURIComponent(name)}/${build}/${encodeURIComponent(commit)}/requeue`,
+                { method: "POST" }
+            );
 
             if (!res.ok) {
                 throw new Error(`HTTP ${res.status}`);
             }
 
-            setError(null);
+            return true;
+        } catch {
+            return false;
+        } finally {
             setLoading(false);
         }
-        catch (e: any) {
-            setError(e.message ?? "Unknown error");
-            setLoading(false);
-        }
-    }
+    };
 
-    return { submit, loading, error };
+    return { submit, loading };
 }
