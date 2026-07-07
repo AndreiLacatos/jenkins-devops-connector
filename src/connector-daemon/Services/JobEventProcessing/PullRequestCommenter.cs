@@ -47,20 +47,32 @@ internal sealed class PullRequestCommenter
 
         if (job.Status == JenkinsPipelineStatus.Succeeded)
         {
-            // Jenkins pipeline succeeded, if there is a comment on the PR,
-            // respond to it and resolve thread
+            // Jenkins pipeline succeeded, if there is a comment on the PR regarding the failure,
+            // respond to it and resolve thread (unless the most recent comment already indicates success)
             var threads = await _azureClient.ListPullRequestThreadsAsync(repo, pullRequest, cancellationToken);
             var thread = threads.GetJenkinsPipelineThread();
             if (thread is not null)
             {
-                var comment = new AzureThread.AzureThreadComment
+                var meta = thread.GetMostRecentComment()?.GetThreadMetadata();
+                var shouldResolveThread = meta switch
                 {
-                    Content = string.IsNullOrWhiteSpace(job.BuildUrl)
-                        ? $"Jenkins build #{job.Build} succeeded."
-                        : $"✅ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) succeeded.",
-                    ParentId = thread.GetRootComment()?.Id,
-                }.TurnIntoConnectorSystemComment(new CommentMetadataV1 { JenkinsJob = job.Name, JenkinsJobSuccessful = true });
-                await _azureClient.ResolvePullRequestThreadAsync(repo, pullRequest, thread, comment, cancellationToken);
+                    // thread needs resolution if the most recent comment indicates failure
+                    CommentMetadataV1 v1 => !v1.JenkinsJobSuccessful,
+
+                    // resolve the thread if there is no metadata to ensure we do not leave any threads hanging 
+                    _ => true,
+                };
+                if (shouldResolveThread)
+                {
+                    var comment = new AzureThread.AzureThreadComment
+                    {
+                        Content = string.IsNullOrWhiteSpace(job.BuildUrl)
+                            ? $"Jenkins build #{job.Build} succeeded."
+                            : $"✅ Jenkins job [{Uri.UnescapeDataString(job.Name)} #{job.Build}]({job.BuildUrl}) succeeded.",
+                        ParentId = thread.GetRootComment()?.Id,
+                    }.TurnIntoConnectorSystemComment(new CommentMetadataV1 { JenkinsJob = job.Name, JenkinsJobSuccessful = true });
+                    await _azureClient.ResolvePullRequestThreadAsync(repo, pullRequest, thread, comment, cancellationToken);
+                }
             }
         }
     }

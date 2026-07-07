@@ -25,6 +25,11 @@ internal static partial class PullRequestThreadExtensions
         {
             return thread.Comments.MinBy(c => c.PublishedAt);
         }
+
+        public AzureThread.AzureThreadComment? GetMostRecentComment()
+        {
+            return thread.Comments.MaxBy(c => c.PublishedAt);
+        }
     }
 
     extension(AzureThread.AzureThreadComment comment)
