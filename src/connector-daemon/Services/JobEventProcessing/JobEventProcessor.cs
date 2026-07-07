@@ -2,7 +2,6 @@ using connector_daemon.AzureIntegration;
 using connector_daemon.AzureIntegration.Models;
 using connector_daemon.Persistence;
 using connector_daemon.Services.EventRegistration.Models;
-using connector_daemon.Services.JobEventProcessing.Extensions;
 
 namespace connector_daemon.Services.JobEventProcessing;
 
@@ -56,9 +55,9 @@ internal sealed class JobEventProcessor : IJobEventProcessor
         try
         {
             var azureRepo = await _azureClient.GetRepositoryAsync(job.GitUrl, cancellationToken);
+            _monitoredRepositories.Add(azureRepo);
             var azureCommit = await _azureClient.GetCommitAsync(azureRepo, job.Commit, cancellationToken);
             var azurePrs = await _azureClient.ListAssociatedActivePullRequestsAsync(azureRepo, azureCommit, cancellationToken);
-            _monitoredRepositories.Add(azureRepo);
 
             var commitHasTerminalState = azureCommit.LatestJenkinsStatus?.State
                 is AzureStateEnum.Succeeded or AzureStateEnum.Failed;

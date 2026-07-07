@@ -210,8 +210,9 @@ internal sealed class AzureClient : IAzureClient, IDisposable
     public async Task<IEnumerable<AzurePullRequest>> ListAssociatedActivePullRequestsAsync(
         AzureRepo repo, AzureCommit commit, CancellationToken cancellationToken)
     {
-        var pullRequests = await _gitClient.GetPullRequestsByProjectAsync(
+        var pullRequests = await _gitClient.GetPullRequestsAsync(
             repo.Project.Name,
+            repo.Id,
             new GitPullRequestSearchCriteria
             {
                 Status = PullRequestStatus.Active,
