@@ -42,8 +42,15 @@ internal sealed class DaemonClient : IDaemonClient
     public async Task RequeueJobAsync(string name, int build, string commit, CancellationToken cancellationToken)
     {
         using var client = _httpClientFactory.CreateClient(nameof(DaemonClient));
-        var uri = new Uri($"/api/system/jobs/{Uri.EscapeDataString(name)}/{build}/{Uri.EscapeDataString(commit)}/requeue");
-        var response = await client.PostAsync(uri, null, cancellationToken);
+        var response = await client.PostAsync(
+            "/api/system/jobs/requeue",
+            JsonContent.Create(new JobQueueItem
+            {
+                Name = name,
+                Build = build,
+                Commit = commit,
+            }),
+            cancellationToken);
         response.EnsureSuccessStatusCode();
     }
 }
