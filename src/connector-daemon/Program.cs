@@ -9,12 +9,15 @@ using connector_daemon.Services.EventRegistration;
 using connector_daemon.Services.JobEventProcessing;
 using connector_daemon.Services.JobEventProcessing.CommentingStrategy;
 using connector_daemon.Services.PullRequestConsistency;
+using connector_sytem.Common.ApiModels.Jobs;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using JobEventModel = connector_daemon.Services.EventRegistration.Models.JobEvent;
+using MonitoredRepositories = connector_daemon.Services.JobEventProcessing.MonitoredRepositories;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IValidator<JobEvent.JobEventApiModel>, JobEvent.JobEventModelValidator>();
+builder.Services.AddTransient<IValidator<JobQueueItem>, JobQueueItemValidator>();
 builder.Services.AddScoped<IJobEventRegistrar, JobEventRegistrar>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddDbContext<AppDbContext>(options =>

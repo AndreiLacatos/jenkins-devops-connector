@@ -1,12 +1,15 @@
+using connector_sytem.Common.ApiModels.Jobs;
 using dashboard.Endpoints.Health;
 using dashboard.Endpoints.Jobs;
 using dashboard.Integrations.Azure;
 using dashboard.Integrations.Daemon;
 using dashboard.Services;
+using FluentValidation;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddTransient<IValidator<JobQueueItem>, JobQueueItemValidator>();
 builder.Services.AddScoped<IJobListService, JobListService>();
 builder.Services.AddScoped<IJobQueueService, JobQueueService>();
 builder.Services.AddScoped<IDaemonClient, DaemonClient>();

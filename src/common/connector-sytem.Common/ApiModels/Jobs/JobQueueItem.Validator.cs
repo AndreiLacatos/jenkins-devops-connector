@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace connector_sytem.Common.ApiModels.Jobs;
 
-internal sealed class JobQueueItemValidator : AbstractValidator<JobQueueItem>
+public sealed class JobQueueItemValidator : AbstractValidator<JobQueueItem>
 {
     public JobQueueItemValidator()
     {
