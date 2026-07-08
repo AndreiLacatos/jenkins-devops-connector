@@ -1,22 +1,23 @@
+using connector_daemon.Services.EventRegistration;
+using connector_daemon.Services.EventRegistration.Models;
 using connector_sytem.Common.ApiModels.Jobs;
-using dashboard.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace dashboard.Endpoints.Jobs;
+namespace connector_daemon.Endpoints.Jobs;
 
-internal static partial class Job
+internal static partial class JobQueue
 {
-    internal static IEndpointRouteBuilder MapRequeueJob(this IEndpointRouteBuilder builder)
+    internal static IEndpointRouteBuilder MapJobEventManualRequeue(this IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/api/jobs/requeue", HandleRequeue);
+        builder.MapPost("/api/system/jobs/requeue", HandleManualRequeue);
         return builder;
     }
 
-    private static async Task<IResult> HandleRequeue(
+    private static async Task<IResult> HandleManualRequeue(
         [FromBody] JobQueueItem queueItem,
         [FromServices] IValidator<JobQueueItem> validator,
-        IJobQueueService service,
+        [FromServices] IJobEventRegistrar registrar,
         CancellationToken cancellationToken)
     {
         var validationResult = await validator.ValidateAsync(queueItem, cancellationToken);
@@ -30,7 +31,14 @@ internal static partial class Job
             return Results.ValidationProblem(issues);
         }
 
-        await service.RequeueJobAsync(queueItem.Name!, queueItem.Build!.Value, queueItem.Commit!, cancellationToken);
+        await registrar.RequeueJobEventAsync(
+            new JobEventRequeueRequest
+            {
+                Name = queueItem.Name!,
+                Build = queueItem.Build!.Value,
+                Commit = queueItem.Commit!,
+            },
+            cancellationToken);
         return Results.Accepted();
     }
 }

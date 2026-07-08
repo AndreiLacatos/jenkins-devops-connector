@@ -11,8 +11,18 @@ export function useRequeue() {
         setLoading(true);
         try {
             const res = await fetch(
-                `/api/jobs/${encodeURIComponent(name)}/${build}/${encodeURIComponent(commit)}/requeue`,
-                { method: "POST" }
+                `/api/jobs/requeue`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name,
+                        build,
+                        commit,
+                    }),
+                }
             );
 
             if (!res.ok) {
